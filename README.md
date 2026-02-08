@@ -31,14 +31,14 @@ claudeask elixir-lang/elixir
 # Using a full URL
 claudeask https://github.com/facebook/react.git
 
-# Or just place any folder or repo into ~/.claudeask/repos/
+# Or just place any folder into ~/.claudeask/repos/ (top-level only)
 # Running with no arguments will ask you to choose from local folders
 claudeask
 ```
 
 ## How it works
 
-The script clones repositories into a structured directory at `~/.claudeask/repos/`. For example, `claudeask owner/repo` will result in a local path of `~/.claudeask/repos/owner/repo`. If the directory exists, it performs a `git pull` before launching the `claude` agent.
+The script clones repositories into `~/.claudeask/repos/` using just the repository name as the folder. For example, `claudeask owner/repo` will result in `~/.claudeask/repos/repo`. Only top-level folders are recognized. If the directory already exists, it performs a `git pull` before launching the `claude` agent.
 
 ## License
 

@@ -11,11 +11,9 @@ INPUT=$1
 if [ -z "$INPUT" ]; then
     # No argument: list existing repos and let user pick
     REPOS=()
-    while IFS= read -r gitdir; do
-        rel="${gitdir#$REPOS_DIR/}"
-        rel="${rel%/.git}"
-        REPOS+=("$rel")
-    done < <(find "$REPOS_DIR" -name .git -type d -maxdepth 3 2>/dev/null | sort)
+    while IFS= read -r dir; do
+        REPOS+=("$(basename "$dir")")
+    done < <(find "$REPOS_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
 
     if [ ${#REPOS[@]} -eq 0 ]; then
         echo "No repositories found. Clone one first:"
@@ -33,26 +31,23 @@ elif [[ "$INPUT" =~ ^https:// || "$INPUT" =~ ^git@ ]]; then
     # Full URL
     REPO_URL="$INPUT"
     REPO_REL_PATH=$(echo "$REPO_URL" | sed -E 's|.*github.com[:/](.*)|\1|' | sed 's|\.git$||')
+    REPO_REL_PATH=$(basename "$REPO_REL_PATH")
 else
     # Shorthand: owner/repo
     REPO_URL="https://github.com/$INPUT.git"
-    REPO_REL_PATH="$INPUT"
+    REPO_REL_PATH=$(basename "$INPUT")
 fi
 
 TARGET_DIR="$REPOS_DIR/$REPO_REL_PATH"
 
 if [ -d "$TARGET_DIR" ]; then
-    echo "Found existing repo. Pulling latest changes..."
     cd "$TARGET_DIR" || exit 1
     if [ -d ".git" ]; then
+        echo "Pulling latest changes..."
         git pull
-    else
-        echo "Error: $TARGET_DIR exists but is not a git repository."
-        exit 1
     fi
 else
     echo "Cloning $REPO_URL into $TARGET_DIR..."
-    mkdir -p "$(dirname "$TARGET_DIR")"
     git clone "$REPO_URL" "$TARGET_DIR"
     cd "$TARGET_DIR" || exit 1
 fi
